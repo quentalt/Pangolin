@@ -118,7 +118,7 @@ router.post("/logout", async (req, res) => {
 })
 
 
-    router.get('/pangolins', (req, res, next) => {
+    router.get('/', (req, res, next) => {
         pangolinCrud.getAll()
             .then(data => res.send(data))
             .catch(err => console.log(err));
