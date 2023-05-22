@@ -49,7 +49,7 @@ form: any;
       }).subscribe((response: any) => {
           if (response.success) {
             this.toastr.success('Welcome back ' + user.fullName + ' !');
-            this.router.navigate(['']).then(r => console.log(r));
+            this.router.navigate(['/']).then(r => console.log(r));
           } else {
             this.toastr.error(response.message);
           }
