@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const {Pangolin} = require('../models/pangolin.model');
-const {User} = require('../models/user.model');
+const User = require('../models/user.model');
 const {generateCrudMethods} = require('../services');
 const {validateDbId,raiseRecordNotFound} = require('../middlewares');
 const jwt = require("jsonwebtoken");
@@ -26,57 +26,66 @@ router.post("/register", async (req, res) => {
             message: "User already exists"
         });
     } else {
-            const pangolin = new User({
-                fullName: fullName,
-                email: email,
-                password: hashedPassword
-            })
+        const pangolin = new User({
+            fullName: fullName,
+            email: email,
+            password: hashedPassword
+        })
 
-            const result = await pangolin.save();
+        const result = await pangolin.save();
 
-            const {_id} = await result.toJSON();
+        const {_id} = await result.toJSON();
 
 
-            const token = jwt.sign({_id: _id}, "secret");
+        const token = jwt.sign({_id: _id}, "secret");
+
+        res.cookie("jwt", token, {
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000 // 1 day
+        })
+
+        res.send({
+            message: "User created successfully",
+    }).catch(err => {
+        console.log(err);
+        res.status(500).send({
+            message: "Something went wrong"
+        })
+})
+    }
+})
+router.post("/login",  (req, res) => {
+    //find user
+    const User = model('User');
+    const email = req.body.email;
+    const password = req.body.password;
+
+    const user = User.find().then((users) => {
+        const user = users.find((user) => user.email === email);
+        if (!user) {
+            return res.status(400).send({
+                message: "User not found"
+            });
+        }
+        bcrypt.compare(password, user.password).then((match) => {
+            if (!match) {
+                return res.status(400).send({
+                    message: "Wrong username or password"
+                });
+            }
+            //generate token
+            const token = jwt.sign({_id: user._id}, "secret");
 
             res.cookie("jwt", token, {
                 httpOnly: true,
                 maxAge: 24 * 60 * 60 * 1000 // 1 day
             })
-
-            res.send({
-                message: "User created successfully",
-            })
-        }
-    })
-
-router.post("/login", async (req, res) => {
-
-    const user = await User.findOne({email: req.body.email})
-
-    if(!user) {
-        return res.status(404).send({
-            message: "User not found"
-        });
-    }
-
-    const validPassword = await bcrypt.compare(req.body.password, user.password);
-
-    if(!validPassword) {
-        return res.status(400).send({
-            message: "Invalid password"
-        });
-    }
-
-
-    const token = jwt.sign({_id: user._id} , "secret");
-
-    res.cookie("jwt", token, {
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 1 day
+        })
+        res.send({
+            message: "Logged in successfully",
+        })
     })
 })
-
 
 router.get('/user', async (req, res) => {
     try {
@@ -89,17 +98,18 @@ router.get('/user', async (req, res) => {
                 message: "unauthenticated"
             });
         }
-        const user = await User.findOne({_id: claims._id})
+        const User = model('User');
 
-
-        let result = await user.save();
-
-        const {password,...data} = await result.toJSON();
-
-
-
-        res.send({
-            user: data
+        const user = await User.find().then((users) => {
+            const user = users.find((user) => user._id === claims._id);
+            if (!user) {
+                return res.status(400).send({
+                    message: "User not found"
+                });
+            }
+            res.send({
+                user: user
+            })
         })
     }
     catch (e) {
@@ -107,8 +117,15 @@ router.get('/user', async (req, res) => {
             message: "unauthenticated"
         });
     }
-})
 
+        let result = await user.save();
+
+        const {password,...data} = await result.toJSON();
+
+        res.send({
+            user: data
+        })
+    })
 
 router.post("/logout", async (req, res) => {
     res.cookie("jwt","",{maxAge:0});
@@ -118,7 +135,7 @@ router.post("/logout", async (req, res) => {
 })
 
 
-    router.get('/pangolins', (req, res, next) => {
+    router.get('/', (req, res, next) => {
         pangolinCrud.getAll()
             .then(data => res.send(data))
             .catch(err => console.log(err));
@@ -151,6 +168,7 @@ router.post("/logout", async (req, res) => {
             fullName: req.body.fullName,
             role: req.body.role,
             city: req.body.city,
+
         }
         pangolinCrud.update(req.params.id, updateRecord)
             .then(data => {

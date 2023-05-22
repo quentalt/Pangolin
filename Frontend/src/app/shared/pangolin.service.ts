@@ -18,7 +18,8 @@ export class PangolinService {
     _id: [''],
     fullName: ['',Validators.required],
     role: ['',Validators.required],
-    city: ['']
+    city: [''],
+
   })
 
   fetchPangolinsList() {

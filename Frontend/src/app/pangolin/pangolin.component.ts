@@ -22,7 +22,7 @@ export class PangolinComponent implements OnInit {
       _id: selectedRecord._id,
       fullName: selectedRecord.fullName,
       role: selectedRecord.role,
-      city: selectedRecord.city
+      city: selectedRecord.city,
 
     })
   }

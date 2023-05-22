@@ -44,13 +44,17 @@ form: any;
     } else if (this.ValidateEmail(user.email)) {
       this.toastr.error('Please enter a valid email');
     } else {
-      this.http.post('http://localhost:3000/api/login', user, {
+      this.http.post('http://localhost:3000/api/login/', user, {
         withCredentials: true
-      }).subscribe((res: any) => {
-          this.router.navigate(['/profile']).then(r => this.toastr.success('User logged in successfully'));
-        }, (err: any) => {
-          this.toastr.error('Invalid credentials');
-        });
+      }).subscribe((response: any) => {
+          if (response.success) {
+            this.toastr.success('Welcome back ' + user.fullName + ' !');
+            this.router.navigate(['/profile']).then(r => console.log(r));
+          } else {
+            this.toastr.error(response.message);
+          }
+        }
+      );
     }
   }
   }

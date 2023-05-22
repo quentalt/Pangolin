@@ -15,16 +15,10 @@ export class ProfileComponent implements OnInit{
   ngOnInit(): void {
     this.http.get('http://localhost:3000/api/user/', {
       withCredentials: true
-    }).subscribe(
-      (res:any) => {
-        this.message = `Hi ${res.fullName}!
-      You have logged in successfully.`;
+    }).subscribe((user: any) => {
+        this.message = `Hi ${user.fullName}`;
         Emitters.authEmitter.emit(true);
-      },
-      (err:any) => {
-        this.message = 'You are not logged in.';
-        Emitters.authEmitter.emit(false);
-      });
+      }
+    );
   }
-
 }

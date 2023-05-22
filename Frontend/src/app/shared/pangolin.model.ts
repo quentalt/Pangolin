@@ -3,6 +3,6 @@ export class Pangolin {
   fullName:  string="";
   role: string="";
   city: string="";
-  email: string="";
-  password: string="";
+ /* email: string="";
+  password: string="";*/
 }

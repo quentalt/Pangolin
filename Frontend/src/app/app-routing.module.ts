@@ -6,7 +6,7 @@ import {LoginComponent} from "./login/login.component";
 import {ProfileComponent} from "./profile/profile.component";
 const routes: Routes = [
   {
-    path: 'home', component:PangolinComponent
+    path: '', component:PangolinComponent
   },
   {
     path:'login', component:LoginComponent
