@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const {Pangolin} = require('../models/pangolin.model');
-const User = require('../models/user.model');
+const {User} = require('../models/user.model');
 const {generateCrudMethods} = require('../services');
 const {validateDbId,raiseRecordNotFound} = require('../middlewares');
 const jwt = require("jsonwebtoken");
@@ -46,16 +46,11 @@ router.post("/register", async (req, res) => {
 
         res.send({
             message: "User created successfully",
-    }).catch(err => {
-        console.log(err);
-        res.status(500).send({
-            message: "Something went wrong"
-        })
-})
+           })
     }
 })
-router.post("/login",  (req, res) => {
-    //find user
+
+router.post("/login", async (req, res) => {
     const User = model('User');
     const email = req.body.email;
     const password = req.body.password;
@@ -87,6 +82,21 @@ router.post("/login",  (req, res) => {
     })
 })
 
+router.get('/users', async (req, res) => {
+    const User = model('User');
+    const users = await User.find();
+    res.send(users);
+})
+
+router.get('/users/:id', async (req, res) => {
+    const User = model('User');
+    const user = await User.findById(req.params.id);
+    res.send(user);
+})
+
+
+
+/*
 router.get('/user', async (req, res) => {
     try {
         const cookie = req.cookies['jwt'];
@@ -126,6 +136,7 @@ router.get('/user', async (req, res) => {
             user: data
         })
     })
+*/
 
 router.post("/logout", async (req, res) => {
     res.cookie("jwt","",{maxAge:0});
