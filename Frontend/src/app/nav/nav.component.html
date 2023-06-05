@@ -1,16 +1,13 @@
-  <mat-toolbar >
-    <span class="p-4">My Application</span>
- <div *ngIf="!authenticated" class="mt-4">
-   <a routerLink="login" class="mr-2">Login</a>
-  <a routerLink="register">Register</a>
- </div>
-
-  <div *ngIf="authenticated" class="mt-4">
-    <a routerLink="/">Home</a>
-    <a routerLink="/login" (click)="logout()">Logout</a>
-    <a routerLink="profile">Profile</a>
+<mat-toolbar>
+  <span class="p-4">Mon p'tit Pangolin </span>
+  <div *ngIf="this.userService.isLoggedIn" class="mr-2">
+    <a routerLink="/" class="mr-2">Home</a>
+    <a routerLink="user-profile/:id" class="mr-2">Profile</a>
+    <a routerLink="login" (click)="logout()">Logout</a>
   </div>
 
-  </mat-toolbar>
-
-
+  <div *ngIf="!this.userService.isLoggedIn" class="mt-4">
+    <a routerLink="login" class="mr-2">Login</a>
+    <a routerLink="register">Register</a>
+  </div>
+</mat-toolbar>

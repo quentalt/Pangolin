@@ -1,4 +1,4 @@
-<form [formGroup]="form" (submit)="submit()">
+<form [formGroup]="signupForm" (ngSubmit)="registerUser()">
   <mat-form-field class="example-full-width">
     <mat-label>Name</mat-label>
     <input type="text" matInput placeholder="Full name" formControlName="fullName">

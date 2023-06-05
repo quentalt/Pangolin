@@ -4,6 +4,7 @@ import {PangolinComponent} from "./pangolin/pangolin.component";
 import {RegisterComponent} from "./register/register.component";
 import {LoginComponent} from "./login/login.component";
 import {ProfileComponent} from "./profile/profile.component";
+import {AuthGuard} from "./shared/auth.guard";
 const routes: Routes = [
   {
     path: '', component:PangolinComponent
@@ -15,7 +16,7 @@ const routes: Routes = [
     path:'register', component:RegisterComponent
   },
   {
-    path: 'profile',component:ProfileComponent
+    path: 'user-profile/:id',component:ProfileComponent, canActivate: [AuthGuard]
   }
 ];
 

@@ -1,47 +1,81 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { User } from './user';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import {
+  HttpClient,
+  HttpHeaders,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
-
-import { map } from 'rxjs/operators';
-import { UserToken } from './user-token';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class UserService {
-  private tokenSubject: BehaviorSubject<UserToken>;
-  public token: Observable<UserToken>;
-  constructor(
-    private router: Router,
-    private http: HttpClient
-  ) {
-    this.tokenSubject = new BehaviorSubject<UserToken>(JSON.parse(
-      localStorage.getItem('RANDOM_TOKEN_SECRET')!));
-    this.token = this.tokenSubject.asObservable();
+
+export class AuthService {
+  endpoint: string = 'http://localhost:3000/api/auth';
+  headers = new HttpHeaders().set('Content-Type', 'application/json');
+  currentUser = {};
+
+  constructor(private http: HttpClient, public router: Router) {}
+
+  // Sign-up
+  signUp(user: User): Observable<any> {
+    let api = `${this.endpoint}/register`;
+    return this.http.post(api, user).pipe(catchError(this.handleError));
   }
 
-  public get tokenValue(): UserToken {
-    return this.tokenSubject.value;
+  // Sign-in
+  signIn(user: User) {
+    return this.http
+      .post<any>(`${this.endpoint}/login`, user)
+      .subscribe((res: any) => {
+        localStorage.setItem('access_token', res.token);
+        this.getUserProfile(res._id).subscribe((res) => {
+          this.currentUser = res;
+          this.router.navigate(['user-profile/' + res.msg._id]);
+        });
+      });
   }
 
-  login(email: string, password: string) {
-    return this.http.post<UserToken>(`http://localhost:3000/api/auth/login`, {email, password})
-      .pipe(
-        map(token => {
-          const userToken: UserToken = token;
-
-          localStorage.setItem('RANDOM_TOKEN_SECRET', JSON.stringify(userToken));
-          this.tokenSubject.next(userToken);
-
-          return userToken;
-        })
-      );
+  getToken() {
+    return localStorage.getItem('access_token');
   }
 
-  logout() {
-    localStorage.removeItem('RANDOM_TOKEN_SECRET');
-    this.tokenSubject.next(null!);
-    this.router.navigate(['/']).then(r => console.log(r));
+  get isLoggedIn(): boolean {
+    let authToken = localStorage.getItem('access_token');
+    return authToken !== null ? true : false;
+  }
+
+  doLogout() {
+    let removeToken = localStorage.removeItem('access_token');
+    if (removeToken == null) {
+      this.router.navigate(['login']);
+    }
+  }
+
+  // User profile
+  getUserProfile(id: any): Observable<any> {
+    let api = `${this.endpoint}/user-profile/${id}`;
+    return this.http.get(api, { headers: this.headers }).pipe(
+      map((res) => {
+        return res || {};
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  // Error
+  handleError(error: HttpErrorResponse) {
+    let msg = '';
+    if (error.error instanceof ErrorEvent) {
+      // client-side error
+      msg = error.error.message;
+    } else {
+      // server-side error
+      msg = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+    return throwError(msg);
   }
 }

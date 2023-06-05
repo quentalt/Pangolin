@@ -7,7 +7,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {MatToolbarModule} from "@angular/material/toolbar";
-import {HttpClientModule} from "@angular/common/http";
+import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {MatInputModule} from "@angular/material/input";
 import { PangolinComponent } from './pangolin/pangolin.component';
 import { PangolinFormComponent } from './pangolin-form/pangolin-form.component';
@@ -19,6 +19,7 @@ import { NavComponent } from './nav/nav.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ProfileComponent } from './profile/profile.component';
+import {JwtInterceptor} from "./interceptors/jwt.interceptor";
 @NgModule({
   declarations: [
     AppComponent,
@@ -50,7 +51,13 @@ import { ProfileComponent } from './profile/profile.component';
     NgHeroiconsModule,
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: JwtInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

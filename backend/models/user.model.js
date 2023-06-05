@@ -16,6 +16,4 @@ const userSchema = new Schema({
     }
 });
 
-const UserModel = mongoose.model('User', userSchema);
-
-module.exports = { Pangolin: UserModel };
+module.exports = mongoose.model('User', userSchema);

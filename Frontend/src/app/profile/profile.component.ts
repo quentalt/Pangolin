@@ -1,24 +1,25 @@
-import {Component, OnInit} from '@angular/core';
-import {Emitters} from "../emitters/emitter";
-import {HttpClient} from "@angular/common/http";
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import {AuthService} from "../shared/user.service";
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss']
+  styleUrls: ['./profile.component.scss'],
 })
-export class ProfileComponent implements OnInit{
-  message= '';
 
-  constructor(private http:HttpClient) { }
+export class ProfileComponent implements OnInit {
+  currentUser: any = {};
 
-  ngOnInit(): void {
-    this.http.get('http://localhost:3000/api/user/', {
-      withCredentials: true
-    }).subscribe((user: any) => {
-        this.message = `Hi ${user.fullName}`;
-        Emitters.authEmitter.emit(true);
-      }
-    );
+  constructor(
+    public authService: AuthService,
+    private actRoute: ActivatedRoute
+  ) {
+    let id = this.actRoute.snapshot.paramMap.get('id');
+    this.authService.getUserProfile(id).subscribe((res:any) => {
+      this.currentUser = res.msg;
+    });
   }
+
+  ngOnInit() {}
 }

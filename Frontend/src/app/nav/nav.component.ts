@@ -1,30 +1,18 @@
 import {Component, OnInit} from '@angular/core';
-import {Emitters} from "../emitters/emitter";
-import {HttpClient} from "@angular/common/http";
+import {AuthService} from "../shared/user.service";
 
 @Component({
   selector: 'app-nav',
   templateUrl: './nav.component.html',
   styleUrls: ['./nav.component.scss']
 })
-export class NavComponent implements OnInit{
-  authenticated = false;
+export class NavComponent {
 
   constructor(
-    private http: HttpClient) {
-
+    public userService: AuthService) {
   }
 
-  ngOnInit(): void {
-   Emitters.authEmitter.subscribe(
-      (auth:boolean) => {
-        this.authenticated = auth;
-      })
+  logout(): void {
+    this.userService.doLogout();
   }
-
-  logout() {
-    this.http.post('http://localhost:3000/api/logout', {}, {
-      withCredentials: true
-    }).subscribe(() => this.authenticated = false);
-    }
 }

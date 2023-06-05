@@ -5,6 +5,7 @@ const cors = require('cors');
 const connectDb = require('./db');
 
 const pangolinRoutes = require('./controllers/pangolin.controller.js');
+const userRoutes = require('./controllers/user.controller.js');
 const {errorHandler} = require('./middlewares');
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(cors({
     origin: 'http://localhost:4200'
 }));
 app.use('/api', pangolinRoutes);
+app.use('/api/auth', userRoutes);
 app.use(errorHandler);
 
 

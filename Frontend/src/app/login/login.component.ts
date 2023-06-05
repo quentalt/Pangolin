@@ -1,60 +1,35 @@
-import {Component, OnInit} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {Router} from "@angular/router";
-import {FormBuilder} from "@angular/forms";
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+import {AuthService} from "../shared/user.service";
 import {HotToastService} from "@ngneat/hot-toast";
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit{
-form: any;
+
+export class LoginComponent implements OnInit {
+  signinForm: FormGroup;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private http: HttpClient,
-    private toastr:HotToastService
-  ) { }
-
-  ngOnInit(): void {
-    this.form = this.formBuilder.group({
-      fullName: '',
-      email: '',
-      password: ''
-});
+    public fb: FormBuilder,
+    public authService: AuthService,
+    public router: Router,
+    private toast: HotToastService
+  ) {
+    this.signinForm = this.fb.group({
+      fullName: [''],
+      email: [''],
+      password: [''],
+    });
   }
 
-  ValidateEmail(mail: string): boolean {
-    const validRegex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/
+  ngOnInit() {}
 
-   if(!!mail.match(validRegex))
-     return false;
-   else
-     return true;
+  loginUser() {
+    this.authService.signIn(this.signinForm.value);
+    this.toast.success('Login successful');
   }
-
-  submit(): void {
-    let user = this.form.getRawValue();
-
-    if (user.fullName == "" || user.email == "" || user.password == "") {
-      this.toastr.error('Please fill all the fields');
-    } else if (this.ValidateEmail(user.email)) {
-      this.toastr.error('Please enter a valid email');
-    } else {
-      this.http.post('http://localhost:3000/api/login/', user, {
-        withCredentials: true
-      }).subscribe((response: any) => {
-          if (response.success) {
-            this.toastr.success('Welcome back ' + user.fullName + ' !');
-            this.router.navigate(['/']).then(r => console.log(r));
-          } else {
-            this.toastr.error(response.message);
-          }
-        }
-      );
-    }
-  }
-  }
+}
