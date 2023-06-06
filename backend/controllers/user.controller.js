@@ -98,17 +98,17 @@ router.route('/').get((req, res, next) => {
 
 
 // Get Single User
-router.route('/user-profile/:id').get(authorize, (req, res, next) => {
-    userSchema.findById(req.params.id, (error, data) => {
-        if (error) {
-            return next(error)
-        } else {
-            res.status(200).json({
-                msg: data,
-            })
-        }
-    })
-})
+router.route('/user-profile/:id').get(authorize, async (req, res, next) => {
+    try {
+        const data = await userSchema.findById(req.params.id);
+        res.status(200).json({
+            msg: data,
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 // Update User
 router.route('/update-user/:id').put((req, res, next) => {
